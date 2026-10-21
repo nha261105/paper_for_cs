@@ -1,0 +1,30 @@
+{
+  "download_dir": "papers",
+  "folders": ["CS", "AI"],
+  "max_results": 10,
+  "sort": "relevance",
+  "field": "all",
+  "categories": [],
+  "category_folders": {
+    "cs.CL": "AI/NLP",
+    "cs.CV": "AI/CV",
+    "cs.LG": "AI",
+    "cs.AI": "AI",
+    "cs": "CS"
+  },
+  "presets": {
+    "rag": {
+      "query": "retrieval augmented generation",
+      "categories": ["cs.CL", "cs.IR"],
+      "sort": "date",
+      "last": "30d",
+      "folder": "AI/NLP"
+    },
+    "new-cv": {
+      "categories": ["cs.CV"],
+      "sort": "date",
+      "last": "7d",
+      "max_results": 20
+    }
+  }
+}

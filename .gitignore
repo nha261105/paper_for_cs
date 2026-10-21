@@ -1,0 +1,14 @@
+# Downloaded papers and their index
+papers/
+*.pdf
+*.pdf.part
+index.csv
+
+# Personal config (see config.example.json)
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
