@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api, type Preset, type SearchParams, type SearchResult } from "../api";
 import { Icon } from "../components/Icon";
 import { PaperMeta } from "../components/PaperMeta";
-import { useStore } from "../store";
+import { useStore, type SearchForm } from "../store";
 
 const FIELDS: Record<string, string> = { all: "Mọi nơi", title: "Tiêu đề", abstract: "Abstract", author: "Tác giả" };
 const SORTS: Record<string, string> = {
@@ -17,23 +17,18 @@ const UNIT_DAYS: Record<string, number> = { d: 1, w: 7, m: 30, y: 365 };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const daysAgo = (n: number) => iso(new Date(Date.now() - n * 86400000));
 
-interface Form {
-  query: string; field: string; categories: string[]; sort: string;
-  period: string; since: string; until: string; max_results: number; folder: string;
-}
+type Form = SearchForm;
 
 export function SearchPage() {
-  const { meta, search, setSearch, setError, addToLibrary } = useStore();
+  const { searchForm } = useStore();
+  if (!searchForm) return <div className="page"><p className="dim pad">Đang tải cấu hình…</p></div>;
+  return <SearchView form={searchForm} />;
+}
+
+function SearchView({ form }: { form: Form }) {
+  const { meta, search, setSearch, setError, addToLibrary, setSearchForm } = useStore();
   const navigate = useNavigate();
-  const d = meta?.defaults;
-  const [form, setForm] = useState<Form>(() => ({
-    query: search.params?.query ?? "",
-    field: search.params?.field ?? d?.field ?? "all",
-    categories: search.params?.categories ?? d?.categories ?? [],
-    sort: search.params?.sort ?? d?.sort ?? "relevance",
-    period: "any", since: search.params?.since ?? "", until: search.params?.until ?? "",
-    max_results: search.params?.max_results ?? d?.max_results ?? 10, folder: "",
-  }));
+  const setForm = (f: (prev: Form) => Form) => setSearchForm(f(form));
   const [customCat, setCustomCat] = useState("");
   const [loading, setLoading] = useState<"" | "search" | "more">("");
   const [busy, setBusy] = useState<Record<string, boolean>>({});

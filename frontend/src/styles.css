@@ -136,8 +136,10 @@ textarea { width: 100%; resize: vertical; line-height: 1.5; font-family: var(--m
 .row-main { min-width: 0; }
 .row-title { font: 600 15px/1.35 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-sub { display: flex; gap: 4px 10px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
-.star { background: none; border: 0; padding: 4px; cursor: pointer; color: var(--line); border-radius: 6px; display: grid; }
-.star:hover { color: var(--muted); }
+/* Unstarred: muted color at 80% = 3.7:1 on white, 3.4:1 on row hover (>= 3:1), so it reads as clickable. */
+.star { background: none; border: 0; padding: 4px; cursor: pointer; color: var(--muted); opacity: .8; border-radius: 6px; display: grid; }
+.star:hover { color: var(--ink); opacity: 1; }
+.star.on { opacity: 1; }
 .star.on { color: var(--star); }
 .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; background: var(--unread); }
 .dot.reading { background: var(--reading); } .dot.done { background: var(--done); }
