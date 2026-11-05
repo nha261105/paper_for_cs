@@ -11,7 +11,7 @@ papers/     PDF đã tải + index.csv + library.db (tự tạo, không commit)
 
 ## Chạy app
 
-Cần Python 3.10+, Node.js 18+ và `make`.
+Cần Python 3.10+ và Node.js 18+. macOS / Linux dùng `make`; Windows dùng `dev.bat` (xem bên dưới).
 
 ```bash
 make
@@ -38,7 +38,17 @@ Sửa code là tự reload. `Ctrl+C` tắt cả hai.
 | `make cli ARGS='-p rag'` | Chạy CLI trong `.venv` |
 | `make clean` | Xoá `.venv`, `node_modules`, bản build |
 
-Không có `make` (thường gặp trên Windows) thì mở 2 terminal:
+**Windows** (không có `make`): chạy file `dev.bat` (double-click, hoặc gõ trong PowerShell / cmd ở thư mục gốc).
+Nó làm y hệt `make`: tạo `.venv`, cài thư viện, bật backend, chờ API, rồi bật frontend.
+
+```powershell
+.\dev.bat
+```
+
+Các lệnh khác giống bảng ở trên, thay `make` bằng `.\dev.bat`: `.\dev.bat backend`, `.\dev.bat frontend`, `.\dev.bat serve`,
+`.\dev.bat cli -p rag`, `.\dev.bat clean`. (Có thể gọi thẳng `.\dev.ps1 ...` nếu máy cho phép chạy script PowerShell.)
+
+Hoặc chạy tay trong 2 terminal:
 
 ```bash
 cd backend && python -m venv .venv && .venv/Scripts/pip install -r requirements.txt && .venv/Scripts/python -m uvicorn server:app --reload
@@ -174,7 +184,8 @@ Xem `config.example.json` để có ví dụ đầy đủ.
 ## Cấu trúc
 
 ```
-Makefile                   make = cài đặt, chạy backend rồi frontend
+Makefile                   make = cài đặt, chạy backend rồi frontend (macOS / Linux)
+dev.ps1, dev.bat           như make, cho Windows
 backend/
   server.py                FastAPI: /api/search, /api/library, /api/paper, PDF; phục vụ frontend/dist nếu có
   fetcher.py               CLI: tham số, in kết quả, chọn bài, chọn thư mục
