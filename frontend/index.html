@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Paper for CS</title>
+    <script>
+      // Apply the saved theme before first paint (no light flash in dark mode).
+      try {
+        var t = localStorage.getItem("theme") || "system";
+        if (t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches))
+          document.documentElement.classList.add("dark");
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

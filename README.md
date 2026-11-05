@@ -62,12 +62,23 @@ cd frontend && npm install && npm run dev
 
 ## Các trang
 
-- **Tìm kiếm**: chủ đề, lĩnh vực (chọn chip hoặc gõ mã như `cs.DB`), sắp xếp, khoảng thời gian, preset.
-  Mỗi kết quả có abstract, nút **Tải về** (lưu vào thư mục gợi ý theo `category_folders` hoặc thư mục bạn gõ).
-- **Thư viện**: đếm bài chưa đọc / đang đọc / đã đọc; tìm trong tiêu đề, tác giả, abstract, ghi chú, tag;
-  lọc theo thư mục, tag, bài hay. Bấm một bài để xem chi tiết, double-click để mở đọc.
-- **Đọc**: PDF mở bằng trình xem PDF của trình duyệt (zoom, tìm chữ, copy, in), panel bên phải để đổi trạng thái,
-  đánh dấu, gắn tag, ghi chú Markdown (tự lưu). Mở bài lần đầu tự chuyển sang "Đang đọc".
+- **Tìm kiếm**: một thanh tìm kiếm, bộ lọc dạng nút (Lĩnh vực, Tìm trong, Thời gian, Sắp xếp, Số bài, Lưu vào).
+  Đổi bộ lọc khi đang có kết quả là tìm lại ngay. Mỗi kết quả có abstract (bấm để mở rộng) và nút **Tải về**;
+  tải xong có thông báo kèm nút **Đọc**. Preset trong `config.json` nằm ở nút **Preset**.
+- **Thư viện**: thanh bên lọc theo trạng thái, bài hay, thư mục, tag (kèm số bài); ô lọc nhanh; bấm một bài để mở
+  panel chi tiết (abstract, trạng thái, tag, ghi chú), nhấp đúp để đọc.
+- **Đọc**: PDF mở bằng trình xem PDF của trình duyệt (zoom, tìm chữ, copy, in), panel ghi chú bên phải kéo giãn được.
+  Ghi chú Markdown tự lưu. Mở bài lần đầu tự chuyển sang "Đang đọc".
+
+Giao diện sáng / tối / theo hệ thống: nút ở góc dưới thanh bên.
+
+| Phím | Ở đâu | Làm gì |
+|---|---|---|
+| `Ctrl+K` (macOS `⌘K`) | mọi nơi | Tìm nhanh: mở bài bất kỳ, chuyển trang, đổi giao diện |
+| `/` | Tìm kiếm, Thư viện | Nhảy vào ô tìm |
+| `j` / `k` (hoặc ↓ / ↑) | Thư viện | Chọn bài |
+| `Enter` / `o` / `s` | Thư viện | Mở chi tiết / đọc / đánh dấu bài hay |
+| `n` | Đọc | Ẩn / hiện panel ghi chú |
 
 Trạng thái, tag, ghi chú lưu trong `papers/library.db` (SQLite). Bài tải bằng CLI tự xuất hiện trong thư viện;
 bấm **Làm mới** ở thanh bên nếu app đang mở. Bài tải bằng CLI chưa có abstract: bấm **Lấy abstract còn thiếu**.
@@ -196,11 +207,14 @@ backend/
     config.py              đọc config.json, preset, gợi ý thư mục theo category
     storage.py             đặt tên file, tên thư mục an toàn, kiểm tra trùng, ghi index.csv
     sources/arxiv.py       gọi arXiv API và parse Atom feed
-frontend/src/
+frontend/src/               React + Tailwind CSS v4 + component kiểu shadcn/ui (Radix, cmdk, sonner)
   api.ts                   gọi backend
-  store.tsx                state dùng chung (thư viện, kết quả tìm kiếm)
+  store.tsx                state dùng chung (thư viện, form + kết quả tìm kiếm)
+  theme.tsx                sáng / tối / theo hệ thống
+  index.css                màu và font (light + dark)
   pages/                   SearchPage, LibraryPage, ReaderPage
-  components/              PaperEditor (trạng thái/tag/ghi chú), TagInput, ...
+  components/              PaperEditor, CommandPalette, Status, TagInput, ...
+  components/ui/           Button, Input, Popover, DropdownMenu, Dialog/Sheet, Command, Tooltip
 ```
 
 Muốn thêm nguồn khác (Semantic Scholar, OpenAlex): tạo `backend/paperfetch/sources/<tên>.py` với
