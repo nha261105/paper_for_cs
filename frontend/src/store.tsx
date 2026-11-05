@@ -1,5 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import { api, type LibraryItem, type Meta, type Patch, type SearchParams, type SearchResult } from "./api";
+
+/** Everything typed into the search form. Lives in the store so it survives page changes. */
+export interface SearchForm {
+  query: string; field: string; categories: string[]; sort: string;
+  period: string; since: string; until: string; max_results: number; folder: string;
+}
 
 export interface SearchState {
   params: SearchParams | null;
@@ -11,7 +18,6 @@ interface Store {
   meta: Meta | null;
   library: LibraryItem[];
   libraryLoaded: boolean;
-  error: string;
   setError: (msg: string) => void;
   refresh: (reloadConfig?: boolean) => Promise<void>;
   update: (key: string, patch: Patch) => Promise<void>;
@@ -19,6 +25,8 @@ interface Store {
   addToLibrary: (item: LibraryItem) => void;
   search: SearchState;
   setSearch: (s: SearchState) => void;
+  searchForm: SearchForm | null;
+  setSearchForm: (f: SearchForm) => void;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -27,8 +35,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [library, setLibrary] = useState<LibraryItem[]>([]);
   const [libraryLoaded, setLibraryLoaded] = useState(false);
-  const [error, setError] = useState("");
+  // Errors show up as toasts (see <Toaster/> in App).
+  const setError = useCallback((msg: string) => { if (msg) toast.error(msg); }, []);
   const [search, setSearch] = useState<SearchState>({ params: null, results: [], exhausted: false });
+  const [searchForm, setSearchForm] = useState<SearchForm | null>(null);
+
+  // Build the form from config.json defaults once they have loaded (not before,
+  // or the defaults would be missed on the first visit).
+  useEffect(() => {
+    if (!meta || searchForm) return;
+    const d = meta.defaults;
+    setSearchForm({
+      query: "", field: d.field, categories: d.categories, sort: d.sort,
+      period: "any", since: "", until: "", max_results: d.max_results, folder: "",
+    });
+  }, [meta, searchForm]);
 
   const refresh = useCallback(async (reloadConfig = false) => {
     try {
@@ -83,8 +104,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ meta, library, libraryLoaded, error, setError, refresh, update, markOpened, addToLibrary, search, setSearch }),
-    [meta, library, libraryLoaded, error, refresh, update, markOpened, addToLibrary, search],
+    () => ({ meta, library, libraryLoaded, setError, refresh, update, markOpened, addToLibrary,
+      search, setSearch, searchForm, setSearchForm }),
+    [meta, library, libraryLoaded, setError, refresh, update, markOpened, addToLibrary, search, searchForm],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
@@ -94,5 +116,3 @@ export function useStore(): Store {
   if (!s) throw new Error("useStore outside StoreProvider");
   return s;
 }
-
-export const STATUS_LABEL: Record<string, string> = { unread: "Chưa đọc", reading: "Đang đọc", done: "Đã đọc" };
