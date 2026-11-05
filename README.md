@@ -17,14 +17,22 @@ Cần Python 3.10+, Node.js 18+ và `make`.
 make
 ```
 
-Mở **http://localhost:5173**. Lần đầu `make` tự tạo `backend/.venv`, cài thư viện Python vào đó và chạy
-`npm install` cho frontend; các lần sau chạy ngay (chỉ cài lại khi `requirements.txt` / `package.json` đổi).
-Backend chạy ở `:8000` (tài liệu API: http://localhost:8000/docs), frontend ở `:5173`, sửa code là tự reload.
-`Ctrl+C` tắt cả hai.
+Chạy ở thư mục gốc của repo (thư mục chứa `backend/` và `frontend/`), rồi mở **http://localhost:5173**.
+
+`make` làm tuần tự:
+
+1. Lần đầu: tạo `backend/.venv`, cài thư viện Python, `npm install` cho frontend
+   (các lần sau bỏ qua, chỉ cài lại khi `requirements.txt` / `package.json` đổi).
+2. Bật backend ở `:8000` (tài liệu API: http://localhost:8000/docs) và chờ đến khi API trả lời được.
+   Nếu backend lỗi (vd cổng 8000 đang bận), `make` dừng và in lỗi, không bật frontend.
+3. Bật frontend ở `:5173`.
+
+Sửa code là tự reload. `Ctrl+C` tắt cả hai.
 
 | Lệnh | Làm gì |
 |---|---|
-| `make` | Chạy backend + frontend để dùng / phát triển |
+| `make` | Chạy backend rồi frontend để dùng / phát triển |
+| `make backend` / `make frontend` | Chỉ chạy một phần (khi muốn mở 2 terminal riêng) |
 | `make serve` | Build frontend một lần rồi chỉ chạy backend: mở http://localhost:8000 (nhẹ hơn, không cần Vite) |
 | `make install` | Chỉ cài đặt |
 | `make cli ARGS='-p rag'` | Chạy CLI trong `.venv` |
@@ -166,7 +174,7 @@ Xem `config.example.json` để có ví dụ đầy đủ.
 ## Cấu trúc
 
 ```
-Makefile                   make = cài đặt + chạy backend và frontend
+Makefile                   make = cài đặt, chạy backend rồi frontend
 backend/
   server.py                FastAPI: /api/search, /api/library, /api/paper, PDF; phục vụ frontend/dist nếu có
   fetcher.py               CLI: tham số, in kết quả, chọn bài, chọn thư mục
