@@ -19,6 +19,16 @@ Trên Windows có thể double-click `paper.bat` thay cho lệnh trên.
 Ngoài CLI, có một web app nhỏ chạy **local** bằng Streamlit để tìm, quản lý và đọc paper:
 
 ```bash
+make
+```
+
+Lần đầu `make` tạo virtualenv `.venv`, cài `requirements.txt` vào đó rồi mở app; các lần sau chỉ mở app
+(tự cài lại khi `requirements.txt` thay đổi). Các lệnh khác: `make install`, `make cli ARGS='-p rag'`
+(chạy CLI trong `.venv`), `make clean` (xoá `.venv`), `make PORT=8600` (đổi cổng).
+
+Không có `make` (thường gặp trên Windows) thì chạy tay:
+
+```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
@@ -155,6 +165,7 @@ Xem `config.example.json` để có ví dụ đầy đủ.
 ## Cấu trúc
 
 ```
+Makefile                   make = tạo .venv, cài thư viện, chạy web app
 app.py                     Web app Streamlit: tìm kiếm, thư viện, đọc PDF + ghi chú
 fetcher.py                 CLI: tham số, in kết quả, chọn bài, chọn thư mục
 paperfetch/
