@@ -30,7 +30,7 @@ Trình duyệt sẽ mở `http://localhost:8501` với 3 trang:
 - **📚 Thư viện**: mọi bài đã tải, kèm số bài chưa đọc / đang đọc / đã đọc. Lọc theo từ khoá
   (tiêu đề, tác giả, abstract, ghi chú, tag), trạng thái, thư mục, tag, bài ⭐.
   Chọn một dòng để xem abstract và sửa trạng thái / tag / ghi chú.
-- **📖 Đọc**: xem PDF ngay trong trang (trình xem PDF có sẵn của trình duyệt: zoom, tìm chữ, copy),
+- **📖 Đọc**: xem PDF ngay trong trang (PDF.js),
   panel bên phải để ghi chú Markdown, gắn tag, đánh dấu đã đọc. Mở bài lần đầu sẽ tự chuyển sang "Đang đọc".
 
 Dữ liệu đọc (trạng thái, tag, ghi chú) lưu trong `<download_dir>/library.db` (SQLite).
@@ -40,7 +40,7 @@ Bài tải bằng CLI chưa có abstract: bấm **Lấy abstract còn thiếu** 
 ## Cài đặt
 
 Yêu cầu Python 3.10+. CLI không cần cài thêm thư viện nào (chỉ dùng thư viện chuẩn);
-web app cần `pip install -r requirements.txt` (Streamlit).
+web app cần `pip install -r requirements.txt` (Streamlit + trình xem PDF).
 
 ```bash
 git clone https://github.com/nha261105/paper_for_cs.git && cd paper_for_cs

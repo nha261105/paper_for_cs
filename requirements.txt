@@ -1,1 +1,1 @@
-streamlit>=1.66
+streamlit[pdf]>=1.66

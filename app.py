@@ -379,13 +379,16 @@ def page_read() -> None:
     def show_pdf():
         if not pdf.exists():
             st.error(f"Không tìm thấy file: {pdf}")
-        elif not hasattr(st, "iframe"):
-            st.error("Cần Streamlit mới hơn để xem PDF: pip install -U -r requirements.txt")
         else:
-            st.iframe(pdf, height=int(height), alt=p["title"])
+            # st.pdf renders with PDF.js. (Chrome blocks its built-in viewer inside
+            # Streamlit's sandboxed iframes, so st.iframe shows "blocked".)
+            try:
+                st.pdf(pdf, height=int(height), key=f"pdf:{key}")
+            except Exception as e:  # streamlit-pdf not installed
+                st.error(f"Không mở được PDF ({e}). Chạy: pip install -U -r requirements.txt")
 
     if side:
-        c1, c2 = st.columns([5, 2], gap="medium")
+        c1, c2 = st.columns([2, 1], gap="medium")
         with c1:
             show_pdf()
         with c2:
