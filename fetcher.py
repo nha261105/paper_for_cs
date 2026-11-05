@@ -15,9 +15,8 @@ from pathlib import Path
 from paperfetch import config, wizard
 from paperfetch.models import Paper
 from paperfetch.sources import arxiv
-from paperfetch.storage import Library
+from paperfetch.storage import Library, clean_folder
 
-FOLDER_PART = re.compile(r'[<>:"|?*\\\x00-\x1f]')
 LAST_RE = re.compile(r"(\d+)\s*([dwmy])")
 LAST_UNITS = {"d": 1, "w": 7, "m": 30, "y": 365}
 
@@ -119,12 +118,6 @@ def parse_selection(text: str, count: int) -> list[int]:
     if bad:
         raise ValueError(f"số ngoài phạm vi 0-{count - 1}: {sorted(bad)}")
     return sorted(picked)
-
-
-def clean_folder(name: str) -> str:
-    parts = [FOLDER_PART.sub("_", p).strip(" .") for p in name.replace("\\", "/").split("/")]
-    parts = [p for p in parts if p and p != ".."]
-    return "/".join(parts)
 
 
 def print_results(papers: list[Paper], lib: Library, offset: int = 0,

@@ -68,6 +68,17 @@ def search(query: str, *, categories: list[str] | None = None,
     return parse_feed(data)
 
 
+def fetch_by_ids(ids: list[str]) -> list[Paper]:
+    """Look up papers by arXiv ID (without version), e.g. to backfill abstracts."""
+    papers = []
+    for i in range(0, len(ids), 100):
+        chunk = ids[i:i + 100]
+        params = {"id_list": ",".join(chunk), "max_results": len(chunk)}
+        url = f"{API_URL}?{urllib.parse.urlencode(params)}"
+        papers += parse_feed(net.get(url, throttle_key=THROTTLE_KEY, min_interval=MIN_INTERVAL))
+    return papers
+
+
 def parse_feed(data: bytes) -> list[Paper]:
     root = ET.fromstring(data)
     papers = []
