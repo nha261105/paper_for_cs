@@ -1,5 +1,5 @@
 {
-  "download_dir": "papers",
+  "download_dir": "../papers",
   "folders": ["CS", "AI"],
   "max_results": 10,
   "sort": "relevance",

@@ -4,8 +4,10 @@ Lives next to the PDFs as <download_dir>/library.db. index.csv stays the CLI's
 log; `sync_from_index` pulls anything the CLI downloaded into the database.
 """
 import csv
+import functools
 import json
 import sqlite3
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -40,6 +42,15 @@ CREATE TABLE IF NOT EXISTS papers (
 JSON_COLS = ("authors", "categories", "tags")
 
 
+def _locked(method):
+    """Serialize access: the web API calls the database from several threads."""
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+    return wrapper
+
+
 def _now() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
@@ -51,9 +62,11 @@ class ReadingDB:
         self.path = root / DB_NAME
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
+        self._lock = threading.RLock()
         self.conn.executescript(SCHEMA)
 
     # ---- writing -----------------------------------------------------------
+    @_locked
     def add(self, paper: Paper, file: str, downloaded_at: str = "") -> None:
         """Insert a downloaded paper, or refresh its metadata (keeps status/tags/notes)."""
         row = {
@@ -75,6 +88,7 @@ class ReadingDB:
             self.conn.execute(f"INSERT INTO papers ({cols}) VALUES ({marks}) "
                               f"ON CONFLICT(key) DO UPDATE SET {updates}", row)
 
+    @_locked
     def update(self, key: str, **fields) -> None:
         allowed = {"status", "starred", "tags", "notes", "last_opened", "summary"}
         bad = set(fields) - allowed
@@ -87,6 +101,7 @@ class ReadingDB:
         with self.conn:
             self.conn.execute(f"UPDATE papers SET {sets} WHERE key = :key", {**fields, "key": key})
 
+    @_locked
     def mark_opened(self, key: str) -> None:
         with self.conn:
             self.conn.execute("UPDATE papers SET last_opened = ?, "
@@ -102,23 +117,28 @@ class ReadingDB:
         d["starred"] = bool(d["starred"])
         return d
 
+    @_locked
     def get(self, key: str) -> dict | None:
         row = self.conn.execute("SELECT * FROM papers WHERE key = ?", (key,)).fetchone()
         return self._decode(row) if row else None
 
+    @_locked
     def all(self) -> list[dict]:
         rows = self.conn.execute("SELECT * FROM papers ORDER BY downloaded_at DESC").fetchall()
         return [self._decode(r) for r in rows]
 
+    @_locked
     def keys(self) -> set[str]:
         return {r[0] for r in self.conn.execute("SELECT key FROM papers")}
 
+    @_locked
     def all_tags(self) -> list[str]:
         tags = set()
         for (t,) in self.conn.execute("SELECT tags FROM papers"):
             tags.update(json.loads(t or "[]"))
         return sorted(tags, key=str.lower)
 
+    @_locked
     def missing_summaries(self, source: str = "arxiv") -> list[str]:
         return [r[0] for r in self.conn.execute(
             "SELECT id FROM papers WHERE source = ? AND summary = ''", (source,))]
@@ -127,6 +147,7 @@ class ReadingDB:
         return self.root / paper["file"]
 
     # ---- syncing with the CLI ----------------------------------------------
+    @_locked
     def sync_from_index(self) -> int:
         """Import rows from index.csv that aren't in the database yet. Returns count."""
         index = self.root / INDEX_NAME

@@ -13,5 +13,10 @@ __pycache__/
 .venv/
 venv/
 
-# Reading database used by the web app (app.py)
+# Reading database used by the web app (backend/server.py)
 library.db
+
+# Frontend
+node_modules/
+dist/
+*.tsbuildinfo
