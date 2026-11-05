@@ -11,6 +11,14 @@ INDEX_NAME = "index.csv"
 INDEX_FIELDS = ["source", "id", "version", "title", "authors", "published",
                 "categories", "folder", "file", "pdf_url", "downloaded_at"]
 MAX_TITLE_CHARS = 80
+FOLDER_PART = re.compile(r'[<>:"|?*\\\x00-\x1f]')
+
+
+def clean_folder(name: str) -> str:
+    """User-typed folder name -> safe relative path like "AI/NLP" ("" = root)."""
+    parts = [FOLDER_PART.sub("_", p).strip(" .") for p in name.replace("\\", "/").split("/")]
+    parts = [p for p in parts if p and p != ".."]
+    return "/".join(parts)
 
 
 def safe_id(paper: Paper) -> str:

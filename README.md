@@ -14,9 +14,33 @@ python fetcher.py
 Tool sẽ hỏi từng bước bằng menu (chủ đề, lĩnh vực, sắp xếp, thời gian...), chỉ cần gõ số hoặc Enter.
 Trên Windows có thể double-click `paper.bat` thay cho lệnh trên.
 
+## Giao diện web (đọc paper trên trình duyệt)
+
+Ngoài CLI, có một web app nhỏ chạy **local** bằng Streamlit để tìm, quản lý và đọc paper:
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Trình duyệt sẽ mở `http://localhost:8501` với 3 trang:
+
+- **🔎 Tìm kiếm**: form thay cho wizard (chủ đề, lĩnh vực, sắp xếp, thời gian, preset).
+  Mỗi kết quả có abstract, nút **⬇️ Tải** và chọn thư mục lưu (mặc định gợi ý theo `category_folders`).
+- **📚 Thư viện**: mọi bài đã tải, kèm số bài chưa đọc / đang đọc / đã đọc. Lọc theo từ khoá
+  (tiêu đề, tác giả, abstract, ghi chú, tag), trạng thái, thư mục, tag, bài ⭐.
+  Chọn một dòng để xem abstract và sửa trạng thái / tag / ghi chú.
+- **📖 Đọc**: xem PDF ngay trong trang (trình xem PDF có sẵn của trình duyệt: zoom, tìm chữ, copy),
+  panel bên phải để ghi chú Markdown, gắn tag, đánh dấu đã đọc. Mở bài lần đầu sẽ tự chuyển sang "Đang đọc".
+
+Dữ liệu đọc (trạng thái, tag, ghi chú) lưu trong `<download_dir>/library.db` (SQLite).
+Bài tải bằng CLI được tự nhập vào thư viện (từ `index.csv`); bấm **🔄 Làm mới** ở sidebar nếu app đang mở.
+Bài tải bằng CLI chưa có abstract: bấm **Lấy abstract còn thiếu** ở trang Thư viện.
+
 ## Cài đặt
 
-Yêu cầu Python 3.10+. Không cần cài thêm thư viện nào (chỉ dùng thư viện chuẩn).
+Yêu cầu Python 3.10+. CLI không cần cài thêm thư viện nào (chỉ dùng thư viện chuẩn);
+web app cần `pip install -r requirements.txt` (Streamlit).
 
 ```bash
 git clone https://github.com/nha261105/paper_for_cs.git && cd paper_for_cs
@@ -131,12 +155,14 @@ Xem `config.example.json` để có ví dụ đầy đủ.
 ## Cấu trúc
 
 ```
+app.py                     Web app Streamlit: tìm kiếm, thư viện, đọc PDF + ghi chú
 fetcher.py                 CLI: tham số, in kết quả, chọn bài, chọn thư mục
 paperfetch/
+  db.py                    SQLite cho web app: trạng thái đọc, tag, ghi chú
   models.py                dataclass Paper dùng chung cho mọi nguồn
   net.py                   HTTP GET + giãn cách + retry
   config.py                đọc config.json, preset, gợi ý thư mục theo category
-  storage.py               đặt tên file, kiểm tra trùng, ghi index.csv
+  storage.py               đặt tên file, tên thư mục an toàn, kiểm tra trùng, ghi index.csv
   sources/arxiv.py         gọi arXiv API và parse Atom feed
 ```
 

@@ -12,3 +12,6 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# Reading database used by the web app (app.py)
+library.db
