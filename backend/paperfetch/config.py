@@ -6,7 +6,7 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG_PATH = PROJECT_DIR / "config.json"
 
 DEFAULTS = {
-    "download_dir": "papers",       # relative paths are resolved against the config file's folder
+    "download_dir": "../papers",    # relative to the config file's folder (backend/) -> <repo>/papers
     "folders": ["CS", "AI"],        # sub-folders created inside download_dir
     "max_results": 10,
     "sort": "relevance",            # relevance | date | updated | oldest

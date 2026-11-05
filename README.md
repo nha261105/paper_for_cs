@@ -1,63 +1,62 @@
 # paper_for_cs
 
-Công cụ CLI nhỏ để tìm paper trên arXiv theo chủ đề, chọn bài và tải PDF về máy.
-Dùng API chính thức của arXiv (không cào HTML), giãn cách ≥ 3 giây giữa các request.
+App nhỏ chạy trên máy mình để tìm paper AI / CS trên arXiv, tải PDF về, quản lý thư viện và đọc + ghi chú
+ngay trên trình duyệt. Dùng API chính thức của arXiv (không cào HTML), giãn cách ≥ 3 giây giữa các request.
 
-## Bắt đầu nhanh
-
-Mở terminal tại thư mục project và chạy:
-
-```bash
-python fetcher.py
+```
+backend/    Python: FastAPI (server.py) + CLI cũ (fetcher.py) + thư viện paperfetch
+frontend/   React + Vite + TypeScript
+papers/     PDF đã tải + index.csv + library.db (tự tạo, không commit)
 ```
 
-Tool sẽ hỏi từng bước bằng menu (chủ đề, lĩnh vực, sắp xếp, thời gian...), chỉ cần gõ số hoặc Enter.
-Trên Windows có thể double-click `paper.bat` thay cho lệnh trên.
+## Chạy app
 
-## Giao diện web (đọc paper trên trình duyệt)
-
-Ngoài CLI, có một web app nhỏ chạy **local** bằng Streamlit để tìm, quản lý và đọc paper:
+Cần Python 3.10+, Node.js 18+ và `make`.
 
 ```bash
 make
 ```
 
-Lần đầu `make` tạo virtualenv `.venv`, cài `requirements.txt` vào đó rồi mở app; các lần sau chỉ mở app
-(tự cài lại khi `requirements.txt` thay đổi). Các lệnh khác: `make install`, `make cli ARGS='-p rag'`
-(chạy CLI trong `.venv`), `make clean` (xoá `.venv`), `make PORT=8600` (đổi cổng).
+Mở **http://localhost:5173**. Lần đầu `make` tự tạo `backend/.venv`, cài thư viện Python vào đó và chạy
+`npm install` cho frontend; các lần sau chạy ngay (chỉ cài lại khi `requirements.txt` / `package.json` đổi).
+Backend chạy ở `:8000` (tài liệu API: http://localhost:8000/docs), frontend ở `:5173`, sửa code là tự reload.
+`Ctrl+C` tắt cả hai.
 
-Không có `make` (thường gặp trên Windows) thì chạy tay:
+| Lệnh | Làm gì |
+|---|---|
+| `make` | Chạy backend + frontend để dùng / phát triển |
+| `make serve` | Build frontend một lần rồi chỉ chạy backend: mở http://localhost:8000 (nhẹ hơn, không cần Vite) |
+| `make install` | Chỉ cài đặt |
+| `make cli ARGS='-p rag'` | Chạy CLI trong `.venv` |
+| `make clean` | Xoá `.venv`, `node_modules`, bản build |
 
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-```
-
-Trình duyệt sẽ mở `http://localhost:8501` với 3 trang:
-
-- **🔎 Tìm kiếm**: form thay cho wizard (chủ đề, lĩnh vực, sắp xếp, thời gian, preset).
-  Mỗi kết quả có abstract, nút **⬇️ Tải** và chọn thư mục lưu (mặc định gợi ý theo `category_folders`).
-- **📚 Thư viện**: mọi bài đã tải, kèm số bài chưa đọc / đang đọc / đã đọc. Lọc theo từ khoá
-  (tiêu đề, tác giả, abstract, ghi chú, tag), trạng thái, thư mục, tag, bài ⭐.
-  Chọn một dòng để xem abstract và sửa trạng thái / tag / ghi chú.
-- **📖 Đọc**: xem PDF ngay trong trang (PDF.js),
-  panel bên phải để ghi chú Markdown, gắn tag, đánh dấu đã đọc. Mở bài lần đầu sẽ tự chuyển sang "Đang đọc".
-
-Dữ liệu đọc (trạng thái, tag, ghi chú) lưu trong `<download_dir>/library.db` (SQLite).
-Bài tải bằng CLI được tự nhập vào thư viện (từ `index.csv`); bấm **🔄 Làm mới** ở sidebar nếu app đang mở.
-Bài tải bằng CLI chưa có abstract: bấm **Lấy abstract còn thiếu** ở trang Thư viện.
-
-## Cài đặt
-
-Yêu cầu Python 3.10+. CLI không cần cài thêm thư viện nào (chỉ dùng thư viện chuẩn);
-web app cần `pip install -r requirements.txt` (Streamlit + trình xem PDF).
+Không có `make` (thường gặp trên Windows) thì mở 2 terminal:
 
 ```bash
-git clone https://github.com/nha261105/paper_for_cs.git && cd paper_for_cs
-cp config.example.json config.json   # tuỳ chọn; Windows: copy config.example.json config.json
+cd backend && python -m venv .venv && .venv/Scripts/pip install -r requirements.txt && .venv/Scripts/python -m uvicorn server:app --reload
 ```
 
-## Cách dùng
+```bash
+cd frontend && npm install && npm run dev
+```
+
+(macOS/Linux: thay `.venv/Scripts/` bằng `.venv/bin/`.)
+
+## Các trang
+
+- **Tìm kiếm**: chủ đề, lĩnh vực (chọn chip hoặc gõ mã như `cs.DB`), sắp xếp, khoảng thời gian, preset.
+  Mỗi kết quả có abstract, nút **Tải về** (lưu vào thư mục gợi ý theo `category_folders` hoặc thư mục bạn gõ).
+- **Thư viện**: đếm bài chưa đọc / đang đọc / đã đọc; tìm trong tiêu đề, tác giả, abstract, ghi chú, tag;
+  lọc theo thư mục, tag, bài hay. Bấm một bài để xem chi tiết, double-click để mở đọc.
+- **Đọc**: PDF mở bằng trình xem PDF của trình duyệt (zoom, tìm chữ, copy, in), panel bên phải để đổi trạng thái,
+  đánh dấu, gắn tag, ghi chú Markdown (tự lưu). Mở bài lần đầu tự chuyển sang "Đang đọc".
+
+Trạng thái, tag, ghi chú lưu trong `papers/library.db` (SQLite). Bài tải bằng CLI tự xuất hiện trong thư viện;
+bấm **Làm mới** ở thanh bên nếu app đang mở. Bài tải bằng CLI chưa có abstract: bấm **Lấy abstract còn thiếu**.
+
+## CLI (terminal)
+
+Chạy trong thư mục `backend/` (hoặc dùng `make cli ARGS='...'` ở thư mục gốc).
 
 ### Cách đơn giản nhất: chọn theo menu
 
@@ -135,13 +134,15 @@ Truy vấn thường được tách thành từng từ và nối bằng `AND` tr
 "is", "the", "of"... vì arXiv không đánh chỉ mục chúng). Nếu truy vấn đã chứa tiền tố trường của arXiv
 (`ti:`, `au:`, `abs:`, `cat:`, `all:`...) thì được gửi nguyên văn.
 
-## Cấu hình (`config.json`, tuỳ chọn)
+## Cấu hình (`backend/config.json`, tuỳ chọn)
+
+Tạo từ file mẫu: `cp backend/config.example.json backend/config.json` (Windows: `copy`). Sửa xong bấm **Làm mới** trong app.
 
 Thứ tự ưu tiên: mặc định < `config.json` < preset < tham số dòng lệnh.
 
 | Khoá | Ý nghĩa | Mặc định |
 |---|---|---|
-| `download_dir` | Thư mục gốc lưu PDF. Đường dẫn tương đối tính từ thư mục chứa `config.json`; dùng được `~`. | `papers` |
+| `download_dir` | Thư mục gốc lưu PDF. Đường dẫn tương đối tính từ thư mục chứa `config.json`; dùng được `~`. | `../papers` (= `<repo>/papers`) |
 | `folders` | Các thư mục con được tạo sẵn trong `download_dir` | `["CS", "AI"]` |
 | `max_results` | Số kết quả mỗi trang | `10` |
 | `sort` | `relevance`, `date`, `updated` hoặc `oldest` | `relevance` |
@@ -165,16 +166,23 @@ Xem `config.example.json` để có ví dụ đầy đủ.
 ## Cấu trúc
 
 ```
-Makefile                   make = tạo .venv, cài thư viện, chạy web app
-app.py                     Web app Streamlit: tìm kiếm, thư viện, đọc PDF + ghi chú
-fetcher.py                 CLI: tham số, in kết quả, chọn bài, chọn thư mục
-paperfetch/
-  db.py                    SQLite cho web app: trạng thái đọc, tag, ghi chú
-  models.py                dataclass Paper dùng chung cho mọi nguồn
-  net.py                   HTTP GET + giãn cách + retry
-  config.py                đọc config.json, preset, gợi ý thư mục theo category
-  storage.py               đặt tên file, tên thư mục an toàn, kiểm tra trùng, ghi index.csv
-  sources/arxiv.py         gọi arXiv API và parse Atom feed
+Makefile                   make = cài đặt + chạy backend và frontend
+backend/
+  server.py                FastAPI: /api/search, /api/library, /api/paper, PDF; phục vụ frontend/dist nếu có
+  fetcher.py               CLI: tham số, in kết quả, chọn bài, chọn thư mục
+  paperfetch/
+    db.py                  SQLite: trạng thái đọc, tag, ghi chú
+    models.py              dataclass Paper dùng chung cho mọi nguồn
+    net.py                 HTTP GET + giãn cách + retry (an toàn khi gọi song song)
+    config.py              đọc config.json, preset, gợi ý thư mục theo category
+    storage.py             đặt tên file, tên thư mục an toàn, kiểm tra trùng, ghi index.csv
+    sources/arxiv.py       gọi arXiv API và parse Atom feed
+frontend/src/
+  api.ts                   gọi backend
+  store.tsx                state dùng chung (thư viện, kết quả tìm kiếm)
+  pages/                   SearchPage, LibraryPage, ReaderPage
+  components/              PaperEditor (trạng thái/tag/ghi chú), TagInput, ...
 ```
 
-Muốn thêm nguồn khác (Semantic Scholar, OpenAlex): tạo `sources/<tên>.py` với `search(...) -> list[Paper]` và `download_pdf(paper) -> bytes`.
+Muốn thêm nguồn khác (Semantic Scholar, OpenAlex): tạo `backend/paperfetch/sources/<tên>.py` với
+`search(...) -> list[Paper]` và `download_pdf(paper) -> bytes`.
